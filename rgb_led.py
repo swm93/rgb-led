@@ -7,9 +7,14 @@
 # multi-colored LED wired in series with three resistors: 330 ohms (red), 180
 # ohms (green), and 120 ohms (blue). The cathode of the LED should go to 3.3V.
 #
+# This script and the resistor values were inspired by Gavin MacDonald's video
+# 'Controlling an RGB LED with the Raspberry Pi'
+# (https://www.youtube.com/watch?v=b4_R1eX9K6s). It is intended to work with
+# the BL-L515 LED (http://www.adafruit.com/datasheets/BL-L515.PDF).
+#
 # Creator:  Scott Mielcarski
 # Created:  January 26, 2015
-# Modified: January 28, 2015
+# Modified: January 29, 2015
 
 
 import RPi.GPIO as GPIO
