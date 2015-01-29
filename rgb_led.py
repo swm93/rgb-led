@@ -1,16 +1,16 @@
 #	RGB LED
-# This script allows the user to change the color of a multi-
-# color LED connected to the GPIO pins of the RaspberryPi. It
-# assumes that the pins that will be used are 11 (red), 13
-# (green), and 15 (blue). If this is not the case, modify the
-# 'pins' list below.
-# The circuit should consist of a multi-colored LED wired in
-# series with three resistors: 330 ohms (red), 180 ohms (green),
-# and 120 ohms (blue). The cathode of the LED should go to 3.3V.
+#
+# This script allows the user to change the color of a multi-color LED
+# connected to the GPIO pins of the Raspberry Pi. It assumes that the pins
+# that will be used are 11 (red), 13 (green), and 15 (blue). If this is not
+# the case, modify the 'pins' list below. The circuit should consist of a
+# multi-colored LED wired in series with three resistors: 330 ohms (red), 180
+# ohms (green), and 120 ohms (blue). The cathode of the LED should go to 3.3V.
 #
 # Creator:	Scott Mielcarski
 # Created:	January 26, 2015
-# Modified:	January 26, 2015
+# Modified:	January 28, 2015
+
 
 import RPi.GPIO as GPIO
 import re
@@ -37,9 +37,10 @@ colors = {
 
 
 #	Run
-# This is the main function of the script. It creates a loop
-# which waits for a users input. Whent the input is recieved,
-# the multi-color LED is set accordingly.
+# This is the main function of the script. It creates a loop which waits for a
+# users input. Whent the input is recieved, the multi-color LED is set
+# accordingly.
+
 def run():
 	# setup the GPIO pins
 	GPIO.setmode(GPIO.BOARD)
@@ -53,9 +54,8 @@ def run():
 			req = raw_input("RGB: ")
 			req = formatRequest(req)
 
-			# update all pins with new values
-			# if req is invalid it will be an empty
-			# list and nothing will happen
+			# update all pins with new values if req is invalid it will be an
+            # empty list and nothing will happen
 			i = 0
 			for _ in req:
 				GPIO.output(pins[i], req[i])
@@ -68,11 +68,13 @@ def run():
 	return
 
 
-#	Format Request
-# Accepts a request from the user and converts it into a list
-# containing values to achieve the appropriate LED output.
-# Ex: 	"orange" becomes [False, False, True]
-#	"010" becomes [True, False, True] 
+#   Format Request
+# Accepts a request from the user and converts it into a list containing
+# values to achieve the appropriate LED output.
+# Example:
+#   "yellow" becomes [False, False, True]
+#   "010" becomes [True, False, True]
+
 def formatRequest(req):
 	val = []
 
@@ -91,10 +93,12 @@ def formatRequest(req):
 
 
 #	Flip Bits
-# Accepts a string of 1s and 0s and returns a list of boolean
-# values corresponding to the opposite bit.
-# Ex:	1 becomes False
-#	0 becomes True
+# Accepts a string of 1s and 0s and returns a list of boolean values
+# corresponding to the opposite bit.
+# Example:
+#   1 becomes False
+#   0 becomes True
+
 def flipBits(str):
 	val = []
 
