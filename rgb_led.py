@@ -37,11 +37,11 @@ colors = {
 
 
 #   Run
-# This is the main function of the script. It creates a loop which waits for a
-# users input. Whent the input is recieved, the multi-color LED is set
+# This is the main function of the script. It creates a loop which waits
+# for a users input. When the input is recieved, the multi-color LED is set
 # accordingly.
 
-def run():
+def main():
     # setup the GPIO pins
     GPIO.setmode(GPIO.BOARD)
     for pin in pins:
@@ -110,4 +110,4 @@ def flipBits(str):
 
 
 # begin execution
-run()
+main()
