@@ -18,26 +18,21 @@
 
 
 import RPi.GPIO as GPIO
+import json
 import re
 
 
+# load default and user settings, user settings take priority
+default_settings = json.loads(open("./settings/default.json").read())
+user_settings = json.loads(open("./settings/user.json").read())
+settings = dict(default_settings.items() + user_settings.items())
+
+
 # list of GPIO pins that should be used
-#   pins[0] -> red
-#   pins[1] -> green
-#   pins[2] -> blue
-pins = [11, 13, 15]
+pins = settings['pins']
 
 # mapping of colors to their appropriate RGB value
-colors = {
-    'off':      '000',
-    'blue':     '001',
-    'green':    '010',
-    'teal':     '011',
-    'red':      '100',
-    'purple':   '101',
-    'yellow':   '110',
-    'white':    '111'
-}
+colors = dict(zip(settings['color_names'], settings['color_codes']))
 
 # list of requests that qualify as exit requests
 exitReqs = ['exit', 'e']
@@ -52,9 +47,10 @@ exitReqs = ['exit', 'e']
 def main():
     # setup the GPIO pins
     GPIO.setmode(GPIO.BOARD)
-    for pin in pins:
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, 1)
+    for p, n in pins.iteritems():
+	n = int(n)
+        GPIO.setup(n, GPIO.OUT)
+        GPIO.output(n, 1)
 
     # loop until the user presses ^C
     try:
@@ -68,10 +64,9 @@ def main():
 
             # update all pins with new values if req is invalid it will be an
             # empty list and nothing will happen
-            i = 0
-            for _ in req:
-                GPIO.output(pins[i], req[i])
-                i += 1
+            GPIO.output(int(pins['r']), req[0])
+            GPIO.output(int(pins['g']), req[1])
+            GPIO.output(int(pins['b']), req[2])
 
     # user pressed ^C so exit
     #except KeyboardInterrupt:
