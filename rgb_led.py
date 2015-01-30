@@ -45,7 +45,7 @@ def main():
     # setup the GPIO pins
     GPIO.setmode(GPIO.BOARD)
     for p, n in pins.iteritems():
-	n = int(n)
+        n = int(n)
         GPIO.setup(n, GPIO.OUT)
         GPIO.output(n, 1)
 
