@@ -53,7 +53,7 @@ def main():
     try:
         while(True):
             req = raw_input("RGB: ")
-            req = formatRequest(req)
+            req = format_request(req)
 
             # update all pins with new values if req is invalid it will be an
             # empty list and nothing will happen
@@ -76,7 +76,7 @@ def main():
 #   "yellow" becomes [False, False, True]
 #   "010" becomes [True, False, True]
 
-def formatRequest(req):
+def format_request(req):
     val = []
 
     # request is a color, convert it to RGB
@@ -88,7 +88,7 @@ def formatRequest(req):
 
     # request is valid, flip its bits (low is active)
     if (val):
-        val = flipBits(val)
+        val = flip_bits(val)
 
     return val
 
@@ -100,7 +100,7 @@ def formatRequest(req):
 #   1 becomes False
 #   0 becomes True
 
-def flipBits(str):
+def flip_bits(str):
     val = []
 
     for c in str:
