@@ -57,11 +57,12 @@ def main():
 
             # update all pins with new values if req is invalid it will be an
             # empty list and nothing will happen
-            GPIO.output(int(pins['r']), req[0])
-            GPIO.output(int(pins['g']), req[1])
-            GPIO.output(int(pins['b']), req[2])
+            if (req):
+                GPIO.output(int(pins['r']), req[0])
+                GPIO.output(int(pins['g']), req[1])
+                GPIO.output(int(pins['b']), req[2])
 
-    # user pressed exited so clean up
+    # user pressed exit so clean up
     finally:
         GPIO.cleanup()
         exit()
