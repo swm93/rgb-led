@@ -34,9 +34,6 @@ pins = settings['pins']
 # mapping of colors to their appropriate RGB value
 colors = dict(zip(settings['color_names'], settings['color_codes']))
 
-# list of requests that qualify as exit requests
-exitReqs = ['exit', 'e']
-
 
 
 #   Run
@@ -56,10 +53,6 @@ def main():
     try:
         while(True):
             req = raw_input("RGB: ")
-
-            if (isExitRequest(req)):
-                break
-
             req = formatRequest(req)
 
             # update all pins with new values if req is invalid it will be an
@@ -68,8 +61,7 @@ def main():
             GPIO.output(int(pins['g']), req[1])
             GPIO.output(int(pins['b']), req[2])
 
-    # user pressed ^C so exit
-    #except KeyboardInterrupt:
+    # user pressed exited so clean up
     finally:
         GPIO.cleanup()
         exit()
@@ -116,13 +108,6 @@ def flipBits(str):
 
     return val
 
-
-#   Is Exit Request
-# Returns a boolean value based on whether the request made by the user is an
-# exit request or not.
-
-def isExitRequest(req):
-    return req in exitReqs
 
 
 # begin execution
