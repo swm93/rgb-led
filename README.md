@@ -6,7 +6,7 @@ This script was inspired by Gavin MacDonalds video 'Controlling an RGB LED with 
 
 ## Getting Started
 
-The script is intended to be run from the command line, so once the circuit is built, boot up the Pi and navigate to the directory where the rgb_led.py file exists. Run the python script by typing: ```python rgb_led.py```. The script should now be running! If everything is set up correctly you should now be able to set the color of the LED by typing one of the following colors or color codes followed by the return key. To modify the mapping between the color names and color codes, refer to the 'JSON Settings' section of this document.
+The script is intended to be run from the command line, so once the circuit is built, boot up the Pi and navigate to the directory where the rgb_led.py file exists. Run the python script by typing: ```python rgb_led.py```. The script should now be running! If everything is set up correctly you should now be able to set the color of the LED by typing one of the following colors or color codes followed by the return key. To modify the mapping between the color names and color codes, refer to the ['JSON Settings: color_names'](#color_names) section of this document.
 
 Color Names | Color Codes
 :-----------|-----------:
@@ -47,7 +47,7 @@ In order to build the circuit the following parts are required:
 
 I chose to use [Round Type, FULL COLOR LED lamp BL-L515](http://www.adafruit.com/product/159) from Adafruit, and 330Ω, 180Ω, and 120Ω resistors purchased from Amazon.
 
-It is assumed that GPIO pins 11, 13, and 15 will be used for the red, green, and blue pins, respectively, of the LED. In order to change these pin numbers, refer to the 'JSON Settings' section of this document.
+It is assumed that GPIO pins 11, 13, and 15 will be used for the red, green, and blue pins, respectively, of the LED. In order to change these pin numbers, refer to the ['JSON Settings: pins'](#pins) section of this document.
 
 ### Schematic
 ![Schematic](https://raw.githubusercontent.com/swm93/rgb-led/master/images/schematic.png)
