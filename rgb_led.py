@@ -51,16 +51,14 @@ def main():
 
     # loop until the user presses ^C
     try:
-        while(True):
+        while (True):
             req = raw_input("RGB: ")
             req = format_request(req)
 
             # update all pins with new values if req is invalid it will be an
             # empty list and nothing will happen
-            if (req):
-                GPIO.output(int(pins['r']), req[0])
-                GPIO.output(int(pins['g']), req[1])
-                GPIO.output(int(pins['b']), req[2])
+            for (i, v) in enumerate(req):
+                GPIO.output(int(pins[i]), v)
 
     # user pressed exit so clean up
     finally:
@@ -71,20 +69,22 @@ def main():
 
 
 #   Format Request
-# Accepts a request from the user and converts it into a list containing
-# values to achieve the appropriate LED output.
+# Accepts a request from the user and converts it into a string containing
+# values to achieve the appropriate LED output. Valid requests are color codes
+# or color names that are outlined in defaults.json.
 # Example:
-#   "yellow" becomes [False, False, True]
-#   "010" becomes [True, False, True]
+#   "yellow" becomes "001"
+#   "010" becomes "101"
+#   "123" or "fish" becomes ""
 
 def format_request(req):
-    val = []
+    val = ""
 
     # request is a color, convert it to RGB
     if (req in colors):
         val = colors[req]
     # request is RGB, don't modify it
-    elif (len(req) == 3 and re.match('^[0-1]*$', req)):
+    elif (re.match('^[0-1]{3}$', req)):
         val = req
 
     # request is valid, flip its bits (low is active)
@@ -97,17 +97,19 @@ def format_request(req):
 #   Flip Bits
 # Accepts a string of 1s and 0s and returns a list of boolean values
 # corresponding to the opposite bit.
+# Warning:
+#   This function does not validate that the string contains only 1s and 0s,
+#   and will produce a strange output in the case that the string contains an
+#   alternate value.
 # Example:
-#   1 becomes False
-#   0 becomes True
+#   1 becomes 0
+#   0 becomes 1
 
-def flip_bits(str):
-    val = []
+def flip_bits(bits):
+    def flip(x):
+        return str(-(int(x)) + 1)
 
-    for c in str:
-        val.append(not bool(int(c)))
-
-    return val
+    return ''.join(map(str, map(flip, bits)))
 
 
 
