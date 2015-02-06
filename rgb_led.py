@@ -44,8 +44,7 @@ colors = dict(zip(settings['color_names'], settings['color_codes']))
 def main():
     # setup the GPIO pins
     GPIO.setmode(GPIO.BOARD)
-    for p, n in pins.iteritems():
-        n = int(n)
+    for n in pins:
         GPIO.setup(n, GPIO.OUT)
         GPIO.output(n, 1)
 
