@@ -17,7 +17,8 @@
 # Modified: January 29, 2015
 
 
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
+import math
 import json
 import re
 
@@ -68,10 +69,11 @@ def main():
             # update all pins with new values if req is invalid it will be an
             # empty list and nothing will happen
             for (i, v) in enumerate(req):
-                ports[i].ChangeDutyCycle(v)
+                ports[i].ChangeDutyCycle(v * (100.0/255.0))
 
     # user pressed exit so clean up
-    finally:
+    #finally:
+    except KeyboardInterrupt:
         for p in ports:
             p.stop()
         GPIO.cleanup()
@@ -111,8 +113,8 @@ def format_request(req):
         val = req
 
     # request is valid, flip its bits (low is active)
-    # if (val):
-        # val = flip_bits(val)
+    if (val):
+        val = flip_bits(val)
 
     return val
 
@@ -129,12 +131,12 @@ def format_request(req):
 #   0 becomes 1
 
 def flip_bits(bits):
-    def flip(x):
-        return str(-(int(x)) + 1)
+    def flip(val):
+        return math.fabs(val-255.0)
 
-    return ''.join(map(str, map(flip, bits)))
+    return map(flip, bits)
 
 
 
 # begin execution
-# main()
+main()
