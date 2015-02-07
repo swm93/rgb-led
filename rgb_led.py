@@ -19,6 +19,7 @@
 
 import RPi.GPIO as GPIO
 import math
+import time
 import json
 import re
 
@@ -42,6 +43,7 @@ colors = dict(zip(settings['color_names'], settings['color_codes']))
 # frequency of pwm
 pwm_frequency = settings['pwm_frequency']
 
+ports = []
 
 
 #   Run
@@ -50,8 +52,6 @@ pwm_frequency = settings['pwm_frequency']
 # accordingly.
 
 def main():
-    ports = []
-
     # setup the GPIO pins
     GPIO.setmode(GPIO.BOARD)
     for n in pins:
@@ -64,6 +64,11 @@ def main():
     try:
         while (True):
             req = raw_input("RGB: ")
+
+            if (req == "fade"):
+                fade()
+                continue
+
             req = format_request(req)
 
             # update all pins with new values if req is invalid it will be an
@@ -72,7 +77,8 @@ def main():
                 ports[i].ChangeDutyCycle(v * (100.0/255.0))
 
     # user pressed exit so clean up
-    finally:
+    #finally:
+    except KeyboardInterrupt:
         for p in ports:
             p.stop()
         GPIO.cleanup()
@@ -120,6 +126,28 @@ def format_request(req):
         val = flip_bits(val)
 
     return val
+
+
+def fade():
+    rgb = [100, 0, 0]
+    num_loops = 10
+
+    for i in range(0, 598*num_loops):
+        for j, v in enumerate(rgb):
+            ports[j].ChangeDutyCycle(math.fabs(rgb[j] - 100.0))
+
+            n = 0 if j+1 > 2 else j+1
+            p = 2 if j-1 < 0 else j-1
+
+            if (rgb[j] == 100):
+                if (rgb[n] == 100):
+                    rgb[j] -= 1
+                elif (rgb[p] != 0):
+                    rgb[p] -= 1
+                else:
+                    rgb[n] += 1
+
+        time.sleep(0.01)
 
 
 #   Flip Bits
