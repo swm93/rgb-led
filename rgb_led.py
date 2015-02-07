@@ -18,6 +18,8 @@
 
 
 import RPi.GPIO as GPIO
+import sys
+import getopt
 import math
 import time
 import json
@@ -51,40 +53,77 @@ ports = []
 # for a users input. When the input is recieved, the multi-color LED is set
 # accordingly.
 
-def main():
+def main(argv):
     # setup the GPIO pins
     GPIO.setmode(GPIO.BOARD)
     for n in pins:
         GPIO.setup(n, GPIO.OUT)
         port = GPIO.PWM(n, pwm_frequency)
-        port.start(0)
+        port.start(100)
         ports.append(port)
 
     # loop until the user presses ^C
     try:
-        while (True):
-            req = raw_input("RGB: ")
+        opts, args = getopt.getopt(argv, "hf:", ["help", "fade"])
 
-            if (req == "fade"):
-                fade()
-                continue
+        for opt, arg in opts:
+            if opt in ("-h", "--help"):
+                usage()
+            elif opt in ("-f", "--fade"):
+                fade(int(arg) if arg.isdigit() else -1)
+            elif opt in ("-c", "--color"):
+                color(arg)
+            else
+                request_input()
 
-            req = format_request(req)
-
-            # update all pins with new values if req is invalid it will be an
-            # empty list and nothing will happen
-            for (i, v) in enumerate(req):
-                ports[i].ChangeDutyCycle(v * (100.0/255.0))
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
 
     # user pressed exit so clean up
-    #finally:
-    except KeyboardInterrupt:
+    finally:
         for p in ports:
             p.stop()
         GPIO.cleanup()
-        exit()
 
     return
+
+
+def color(req):
+    req = format_request(req)
+
+    # update all pins with new values if req is invalid it will be an empty
+    # list and nothing will happen
+    for (i, v) in enumerate(req):
+        ports[i].ChangeDutyCycle(v * (100.0/255.0));
+
+
+def request_input():
+    while (True):
+        req = raw_input("Color:\n")
+        color(req)
+
+
+def fade(num_loops=-1):
+    rgb = [100, 0, 0]
+    i = 0
+
+    while (i != 598*num_loops):
+        for j, v in enumerate(rgb):
+            n = 0 if j+1 > 2 else j+1
+            p = 2 if j-1 < 0 else j-1
+
+            ports[j].ChangeDutyCycle(math.fabs(rgb[j] - 100.0))
+
+            if (rgb[j] == 100):
+                if (rgb[n] == 100):
+                    rgb[j] -= 1
+                elif (rgb[p] != 0):
+                    rgb[p] -= 1
+                else:
+                    rgb[n] += 1
+
+        time.sleep(0.01)
 
 
 #   Format Request
@@ -128,26 +167,8 @@ def format_request(req):
     return val
 
 
-def fade():
-    rgb = [100, 0, 0]
-    num_loops = 10
-
-    for i in range(0, 598*num_loops):
-        for j, v in enumerate(rgb):
-            ports[j].ChangeDutyCycle(math.fabs(rgb[j] - 100.0))
-
-            n = 0 if j+1 > 2 else j+1
-            p = 2 if j-1 < 0 else j-1
-
-            if (rgb[j] == 100):
-                if (rgb[n] == 100):
-                    rgb[j] -= 1
-                elif (rgb[p] != 0):
-                    rgb[p] -= 1
-                else:
-                    rgb[n] += 1
-
-        time.sleep(0.01)
+def usage():
+    print "error"
 
 
 #   Flip Bits
@@ -170,4 +191,4 @@ def flip_bits(bits):
 
 
 # begin execution
-main()
+main(sys.argv[1:])
