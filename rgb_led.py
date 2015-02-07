@@ -72,8 +72,7 @@ def main():
                 ports[i].ChangeDutyCycle(v * (100.0/255.0))
 
     # user pressed exit so clean up
-    #finally:
-    except KeyboardInterrupt:
+    finally:
         for p in ports:
             p.stop()
         GPIO.cleanup()
