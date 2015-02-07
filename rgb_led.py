@@ -95,9 +95,13 @@ def format_request(req):
 
     # request is a color, use lookup table to convert it to list
     if (isinstance(req, str) and req in colors):
-        val = colors[req]
+        req = colors[req]
+
+    if (isinstance(req, unicode)):
+        req = str(req)
+
     # request is hex color, needs to be parsed and put in list
-    elif (isinstance(req, str) and re.match(hex_color_regex, req)):
+    if (isinstance(req, str) and re.match(hex_color_regex, req)):
         req = req.lstrip('#')
         lv = len(req)
         mx = math.pow(17, (6-lv)/3)
