@@ -18,8 +18,11 @@
 
 try:
     import RPi.GPIO as GPIO
+    from pwm import PWM
 except:
-    class Pin:
+    class PWM:
+        def __init__(self, pin_num, pwm_frequency):
+            return None
         def ChangeDutyCycle(self, dc):
             return dc
         def start(self, dc):
@@ -36,7 +39,7 @@ except:
             return pin
         @staticmethod
         def PWM(pin, freq):
-            return Pin()
+            return PWM(pin, freq)
 
 import math
 import colorsys
@@ -48,10 +51,10 @@ class RgbLed:
 
 
     def __init__(self, pins, pwm_frequency):
+        GPIO.setmode(GPIO.BOARD)
+
         self.pwm_frequency = pwm_frequency
         self.pins = dict(zip(self.pin_names, map(self.setup_pin, pins)))
-
-        GPIO.setmode(GPIO.BOARD)
 
 
     # RGB color
@@ -120,7 +123,7 @@ class RgbLed:
 
     def setup_pin(self, pin_num):
         GPIO.setup(pin_num, GPIO.OUT)
-        pin = GPIO.PWM(pin_num, self.pwm_frequency)
+        pin = PWM(pin_num, self.pwm_frequency)
         self.set_duty_cycle(pin, 100)
         pin.start(100)
 
