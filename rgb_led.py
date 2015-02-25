@@ -16,179 +16,112 @@
 # Created:  January 26, 2015
 # Modified: January 29, 2015
 
+try:
+    import RPi.GPIO as GPIO
+except:
+    class Pin:
+        def ChangeDutyCycle(self, dc):
+            return dc
+        def start(self, dc):
+            return dc
+    class GPIO:
+        IN = 0
+        OUT = 1
+        BOARD = 2
+        @staticmethod
+        def setmode(opt):
+            return opt
+        @staticmethod
+        def setup(pin, io):
+            return pin
+        @staticmethod
+        def PWM(pin, freq):
+            return Pin()
 
-import RPi.GPIO as GPIO
-import sys
-import getopt
 import math
-import time
-import json
-import re
-
-
-hex_color_regex = '^#(?:[0-9a-fA-F]{3}){1,2}$'
-list_of_nums_regex = '[0-9]+\s+[0-9]+\s+[0-9]'
-
-
-# load default and user settings, user settings take priority
-default_settings = json.loads(open("./settings/default.json").read())
-user_settings = json.loads(open("./settings/user.json").read())
-settings = dict(default_settings.items() + user_settings.items())
-
-
-# list of GPIO pins that should be used
-pins = settings['pins']
-
-# mapping of colors to their appropriate RGB value
-colors = dict(zip(settings['color_names'], settings['color_codes']))
-
-# frequency of pwm
-pwm_frequency = settings['pwm_frequency']
-
-ports = []
-
-
-#   Run
-# This is the main function of the script. It creates a loop which waits
-# for a users input. When the input is recieved, the multi-color LED is set
-# accordingly.
-
-def main(argv):
-    # setup the GPIO pins
-    GPIO.setmode(GPIO.BOARD)
-    for n in pins:
-        GPIO.setup(n, GPIO.OUT)
-        port = GPIO.PWM(n, pwm_frequency)
-        port.start(100)
-        ports.append(port)
-
-    # loop until the user presses ^C
-    try:
-        opts, args = getopt.getopt(argv, "hf:", ["help", "fade"])
-
-        for opt, arg in opts:
-            if opt in ("-h", "--help"):
-                usage()
-            elif opt in ("-f", "--fade"):
-                fade(int(arg) if arg.isdigit() else -1)
-            elif opt in ("-c", "--color"):
-                color(arg)
-            else
-                request_input()
-
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-
-    # user pressed exit so clean up
-    finally:
-        for p in ports:
-            p.stop()
-        GPIO.cleanup()
-
-    return
-
-
-def color(req):
-    req = format_request(req)
-
-    # update all pins with new values if req is invalid it will be an empty
-    # list and nothing will happen
-    for (i, v) in enumerate(req):
-        ports[i].ChangeDutyCycle(v * (100.0/255.0));
-
-
-def request_input():
-    while (True):
-        req = raw_input("Color:\n")
-        color(req)
-
-
-def fade(num_loops=-1):
-    rgb = [100, 0, 0]
-    i = 0
-
-    while (i != 598*num_loops):
-        for j, v in enumerate(rgb):
-            n = 0 if j+1 > 2 else j+1
-            p = 2 if j-1 < 0 else j-1
-
-            ports[j].ChangeDutyCycle(math.fabs(rgb[j] - 100.0))
-
-            if (rgb[j] == 100):
-                if (rgb[n] == 100):
-                    rgb[j] -= 1
-                elif (rgb[p] != 0):
-                    rgb[p] -= 1
-                else:
-                    rgb[n] += 1
-
-        time.sleep(0.01)
-
-
-#   Format Request
-# Accepts a request from the user and converts it into a string containing
-# values to achieve the appropriate LED output. Valid requests are color codes
-# or color names that are outlined in defaults.json.
-# Example:
-#   "yellow" becomes "001"
-#   "010" becomes "101"
-#   "123" or "fish" becomes ""
-
-def format_request(req):
-    val = ""
-
-    # request is a color, use lookup table to convert it to list
-    if (isinstance(req, str) and req in colors):
-        req = colors[req]
-
-    if (isinstance(req, unicode)):
-        req = str(req)
-
-    # request is hex color, needs to be parsed and put in list
-    if (isinstance(req, str) and re.match(hex_color_regex, req)):
-        req = req.lstrip('#')
-        lv = len(req)
-        mx = math.pow(17, (6-lv)/3)
-        val = [int(req[i:i + lv // 3], 16)*mx for i in range(0, lv, lv // 3)]
-    # request is a string of numbers, needs to be split into list
-    elif (isinstance(req, str) and re.match(list_of_nums_regex, req)):
-        req = re.split('\s+', req)
-        val = [int(s) for s in req if (s.isdigit())]
-    # request is a list, therefore it came from json file (formatted
-    # correctly)
-    elif (isinstance(req, list) and len(req) == 3):
-        val = req
-
-    # request is valid, flip its bits (low is active)
-    if (val):
-        val = flip_bits(val)
-
-    return val
-
-
-def usage():
-    print "error"
-
-
-#   Flip Bits
-# Accepts a string of 1s and 0s and returns a list of boolean values
-# corresponding to the opposite bit.
-# Warning:
-#   This function does not validate that the string contains only 1s and 0s,
-#   and will produce a strange output in the case that the string contains an
-#   alternate value.
-# Example:
-#   1 becomes 0
-#   0 becomes 1
-
-def flip_bits(bits):
-    def flip(val):
-        return math.fabs(val-255.0)
-
-    return map(flip, bits)
+import colorsys
 
 
 
-# begin execution
-main(sys.argv[1:])
+class RgbLed:
+    pin_names = ('r', 'g', 'b')
+
+
+    def __init__(self, pins, pwm_frequency):
+        self.pwm_frequency = pwm_frequency
+        self.pins = dict(zip(self.pin_names, map(self.setup_pin, pins)))
+
+        GPIO.setmode(GPIO.BOARD)
+
+
+    # RGB color
+    def get_rgb_color(self):
+        return tuple(round(math.fabs(self.pins[x].duty_cycle * 255.0 / 100.0 - 255.0), 6) for x in self.pin_names)
+
+
+    def set_rgb_color(self, r, g, b):
+        for c, p in self.pins.items():
+            dc = math.fabs(locals()[c] * 100.0 / 255.0 - 100.0)
+            self.set_duty_cycle(p, dc)
+
+
+    # HSV color
+    def get_hsv_color(self):
+        rgb = tuple(x/255.0 for x in self.get_rgb_color())
+        hsv = colorsys.rgb_to_hsv(*rgb)
+        return (hsv[0]*360.0, hsv[1]*100.0, hsv[2]*100.0)
+
+
+    def set_hsv_color(self, h, s, v):
+        rgb = tuple(x*255.0 for x in colorsys.hsv_to_rgb((h%360)/360.0, s/100.0, v/100.0))
+        self.set_rgb_color(*rgb)
+
+
+    # HLS color
+    def get_hsl_color(self):
+        rgb = tuple(x/255.0 for x in self.get_rgb_color())
+        hls = colorsys.rgb_to_hls(*rgb)
+        return (hls[0]*360.0, hls[2]*100.0, hls[1]*100.0)
+
+
+    def set_hsl_color(self, h, s, l):
+        rgb = tuple(x*255.0 for x in colorsys.hls_to_rgb((h%360)/360.0, l/100.0, s/100.0))
+        self.set_rgb_color(*rgb)
+
+
+    # Hex color
+    def get_hex_color(self):
+        return '#%02x%02x%02x' % self.get_rgb_color()
+
+    def set_hex_color(self, hexc):
+        hexc = hexc.lstrip('#')
+        lc = len(hexc)
+        mx = math.pow(17, (6-lc)/3)
+        rgb = (int(hexc[i:i+lc//3], 16)*mx for i in range(0, lc, lc//3))
+
+        self.set_rgb_color(*rgb)
+
+
+    # Brightness
+    def get_brightness(self):
+        return self.get_hsl_color()[2]
+
+
+    def set_brightness(self, brightness):
+        hsl = self.get_hsl_color()
+        self.set_hsl_color(hsl[0], hsl[1], brightness)
+
+
+    # Duty Cycle
+    def set_duty_cycle(self, pin, duty_cycle):
+        pin.duty_cycle = duty_cycle
+        pin.ChangeDutyCycle(duty_cycle)
+
+
+    def setup_pin(self, pin_num):
+        GPIO.setup(pin_num, GPIO.OUT)
+        pin = GPIO.PWM(pin_num, self.pwm_frequency)
+        self.set_duty_cycle(pin, 100)
+        pin.start(100)
+
+        return pin
