@@ -43,6 +43,7 @@ except:
 
 import math
 import colorsys
+from time import sleep
 
 
 
@@ -55,6 +56,10 @@ class RgbLed:
 
         self.pwm_frequency = pwm_frequency
         self.pins = dict(zip(self.pin_names, map(self.setup_pin, pins)))
+
+
+    def cleanup(self):
+        GPIO.cleanup()
 
 
     # RGB color
@@ -114,6 +119,34 @@ class RgbLed:
         hsl = self.get_hsl_color()
         self.set_hsl_color(hsl[0], hsl[1], brightness)
 
+
+
+    # Fade
+    def fade(self, num_loops=-1, loop_duration=10.0):
+        num_states = 1530
+        sleep_duration = loop_duration/(2*num_states)
+        rgb = {'r':255, 'g':0, 'b':0}
+        rgb_str = 'rgb'
+        i = 0
+
+        while (i != num_states*num_loops):
+            self.set_rgb_color(rgb['r'], rgb['g'], rgb['b'])
+
+            for c, p in self.pins.items():
+                j = rgb_str.find(c)
+                n = rgb_str[0 if j+1 > 2 else j+1]
+                p = rgb_str[j-1]
+
+                if (rgb[c] == 255):
+                    if (rgb[n] == 255):
+                        rgb[c] -= 1
+                    elif (rgb[p] != 0):
+                        rgb[p] -= 1
+                    else:
+                        rgb[n] += 1
+
+            i += 1
+            sleep(sleep_duration)
 
     # Duty Cycle
     def set_duty_cycle(self, pin, duty_cycle):

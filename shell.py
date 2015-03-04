@@ -33,6 +33,14 @@ class RgbLedShell(Cmd):
             usage='%(prog)s [options] <inputs>',
             description='TODO: add description'
         )
+        self.fade_parser.add_argument('--count', '-c', type=int, default=-1)
+        self.fade_parser.add_argument('--duration', '-d', type=float, default=10.0)
+
+        self.brightness_parser = ArgumentParser(
+            usage='%(prog)s [options] <inputs>',
+            description='TODO: add description'
+        )
+        self.brightness_parser.add_argument('brightness', nargs=1, type=float)
 
         super(self.__class__, self).__init__()
 
@@ -61,9 +69,15 @@ class RgbLedShell(Cmd):
             self.error(e)
 
     def do_fade(self, args):
-        return
+        args = self.fade_parser.parse_args(args.split())
+        self.led.fade(args.count, args.duration)
+
+    def do_brightness(self, args):
+        args = self.brightness_parser.parse_args(args.split())
+        self.led.set_brightness(args.brightness[0])
 
     def do_exit(self, *args):
+        self.led.cleanup()
         return True
 
     do_EOF = do_exit
