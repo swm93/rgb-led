@@ -11,7 +11,7 @@ import re
 
 
 
-class RgbLedShell(Cmd):
+class LedShell(Cmd):
     prompt = '> '
 
     def __init__(self):
@@ -102,10 +102,3 @@ class RgbLedShell(Cmd):
         user_settings = json.loads(open('./settings/user.json').read())
 
         return dict(list(default_settings.items()) + list(user_settings.items()))
-
-
-
-
-if (__name__ == '__main__'):
-    shell = RgbLedShell()
-    shell.cmdloop()
