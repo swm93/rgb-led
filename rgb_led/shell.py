@@ -6,6 +6,7 @@ from shell_text_style import ShellTextStyle as TextStyle
 
 from cmd import Cmd
 from argparse import ArgumentParser, ArgumentTypeError
+import os.path
 import json
 import re
 
@@ -98,7 +99,10 @@ class LedShell(Cmd):
 
     # load default and user settings, user settings take priority
     def load_settings(self):
-        default_settings = json.loads(open('./settings/default.json').read())
-        user_settings = json.loads(open('./settings/user.json').read())
+        default_path = './settings/default.json'
+        user_path = './settings/user.json'
+
+        default_settings = json.loads(open(default_path).read())
+        user_settings = json.loads(open(user_path).read()) if os.path.isfile(user_path) else {}
 
         return dict(list(default_settings.items()) + list(user_settings.items()))
